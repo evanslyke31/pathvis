@@ -3,7 +3,6 @@ var graphics = new PIXI.Graphics();
 var renderer = PIXI.autoDetectRenderer(200, 200, { backgroundColor: 0x000000 });
 renderer.resize(window.innerWidth, window.innerHeight - 4);
 document.body.appendChild(renderer.view);
-
 stage.addChild(graphics);
 
 var yvel;
@@ -28,7 +27,7 @@ function init() {
     nodeSize = screenHeight / boardH;
     for (var i = 0; i < boardW; i++) {   //fill nodes with node objects
         for (var j = 0; j < boardH; j++) {   //fill nodes with node objects
-            nodes[i][j] = (new Node(i * nodeSize, j * nodeSize, Math.floor(Math.random() * 16777215)));
+            nodes[i][j] = (new Node(i * nodeSize, j * nodeSize, 0xFFFFFF));
 
         }
     }
@@ -46,31 +45,46 @@ function draw() {
 
     for (var i = 0; i < nodes.length; i++) {   //draw every node each game loop
         for (var j = 0; j < nodes[1].length; j++) {
-            nodes[i][j].color = Math.floor(Math.random() * 16777215);
+            //nodes[i][j].color = Math.floor(Math.random() * 16777215);
             nodes[i][j].display();
         }
     }
 
-    graphics.beginFill(0x9b59b6); // Purple
-    graphics.drawRect(600, yvel, 25, 25); // drawRect(x, y, width, height)
-    graphics.endFill();
+    //graphics.beginFill(0x9b59b6); // Purple
+    //graphics.drawRect(600, yvel, 25, 25); // drawRect(x, y, width, height)
+    //graphics.endFill();
 }
 
 function loop(progress) {
+    //console.log(mousePosition);
     update(progress);
     draw();
     renderer.render(stage);
 }
 
+function mousedown(event) {
+    nodes[Math.floor(event.x / nodeSize)][Math.floor(event.y / nodeSize)].color = 0x00FF00;
+    draw();
+    renderer.render(stage);
+}
+
+document.addEventListener('mousedown', mousedown);
 
 //The object Node will make up the board
 function Node(x, y, color) {
     this.x = x;
     this.y = y;
     this.color = color;
+    this.isStartNode = false;
+    this.isEndNode = false;
+    this.isBoundaryNode = false;
 
     this.display = function () {
+        if (this.isStartNode) {
+            this.color = 0xFFFF00;
+        }
         graphics.beginFill(this.color); // Purple
+        graphics.lineStyle(5, 0x000000);
         graphics.drawRect(this.x, this.y, nodeSize, nodeSize); // drawRect(x, y, width, height)
         graphics.endFill();
     }
