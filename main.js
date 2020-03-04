@@ -5,6 +5,43 @@ renderer.resize(window.innerWidth, window.innerHeight - 4);
 document.body.appendChild(renderer.view);
 stage.addChild(graphics);
 
+class Queue {
+
+    constructor() {
+        this.items = [];
+    }
+
+    enqueue(element) {
+        // adding element to the queue 
+        this.items.push(element);
+    }
+    dequeue() {
+        // removing element from the queue 
+        // returns underflow when called  
+        // on empty queue 
+        if (this.isEmpty())
+            return "Underflow";
+        return this.items.shift();
+    }
+    front() {
+        // returns the Front element of  
+        // the queue without removing it. 
+        if (this.isEmpty())
+            return "No elements in Queue";
+        return this.items[0];
+    }
+    isEmpty() {
+        // return true if the queue is empty. 
+        return this.items.length == 0;
+    }
+    printQueue() {
+        var str = "";
+        for (var i = 0; i < this.items.length; i++)
+            str += this.items[i] + " ";
+        return str;
+    }
+}
+
 var yvel;
 var nodes;
 var screenWidth;
@@ -12,6 +49,12 @@ var screenHeight;
 var boardW;
 var boardH;
 var nodeSize;
+var startNode;
+var endNode;
+var finished;
+
+var queue;
+var s;
 
 init();
 function init() {
@@ -19,6 +62,7 @@ function init() {
     nodes = [];
     boardW = 39;
     boardH = 20;
+    finished = false;
     for (var i = 0; i < boardW; i++) {
         nodes[i] = [];
     }
@@ -27,17 +71,78 @@ function init() {
     nodeSize = screenHeight / boardH;
     for (var i = 0; i < boardW; i++) {   //fill nodes with node objects
         for (var j = 0; j < boardH; j++) {   //fill nodes with node objects
-            nodes[i][j] = (new Node(i * nodeSize, j * nodeSize, 0xFFFFFF));
+            nodes[i][j] = (new Node(i, j, 0xFFFFFF));
 
         }
     }
+    startNode = nodes[2][2];
+    startNode.color = 0xFFFF00;
+    endNode = nodes[15][15];
+    endNode.color = 0xFF0000;
+
+    queue = new Queue();
+    startNode.visited = true;
+    queue.enqueue(startNode);
+
+    breadthFirst();
 
     loop(); //just render graphics on load instantly
-    var myVar = setInterval(loop, 500); //cause game loop to iterate every 500ms
+    var myVar = setInterval(loop, 16); //cause game loop to iterate every 500ms
+}
+
+
+
+function getAdjacents(nod) {
+    var list = [];
+    if (nod.x > 0)
+        list.push(nodes[nod.x - 1][nod.y]);
+    if (nod.y > 0)
+        list.push(nodes[nod.x][nod.y - 1]);
+    if (nod.x < boardW - 1)
+        list.push(nodes[nod.x + 1][nod.y]);
+    if (nod.y < boardH - 1)
+        list.push(nodes[nod.x][nod.y + 1]);
+    console.log(list);
+    return list;
+}
+
+
+function breadthFirst() {
+    if (!queue.isEmpty()) {
+        s = queue.dequeue();
+        console.log(s);
+        if (s === endNode) {
+            console.log("finished!!");
+            finished = true;
+        }
+        if (s.x > 0 && !nodes[s.x - 1][s.y].visited) {
+            nodes[s.x - 1][s.y].visited = true;
+            nodes[s.x - 1][s.y].color = 0x00FF00;
+            queue.enqueue(nodes[s.x - 1][s.y]);
+        }
+        if (s.y > 0 && !nodes[s.x][s.y - 1].visited) {
+            nodes[s.x][s.y - 1].visited = true;
+            nodes[s.x][s.y - 1].color = 0x00FF00;
+            queue.enqueue(nodes[s.x][s.y - 1]);
+        }
+        if (s.x < boardW - 1 && !nodes[s.x + 1][s.y].visited) {
+            nodes[s.x + 1][s.y].color = 0x00FF00;
+            nodes[s.x + 1][s.y].visited = true;
+            queue.enqueue(nodes[s.x + 1][s.y]);
+        }
+        if (s.y < boardH - 1 && !nodes[s.x][s.y + 1].visited) {
+            nodes[s.x][s.y + 1].visited = true;
+            nodes[s.x][s.y + 1].color = 0x00FF00;
+            queue.enqueue(nodes[s.x][s.y + 1]);
+        }
+    }
+
 }
 
 function update(progress) {
-    yvel += 2;
+    if (!finished) {
+        breadthFirst();
+    }
 }
 
 function draw() {
@@ -50,9 +155,6 @@ function draw() {
         }
     }
 
-    //graphics.beginFill(0x9b59b6); // Purple
-    //graphics.drawRect(600, yvel, 25, 25); // drawRect(x, y, width, height)
-    //graphics.endFill();
 }
 
 function loop(progress) {
@@ -78,6 +180,7 @@ function Node(x, y, color) {
     this.isStartNode = false;
     this.isEndNode = false;
     this.isBoundaryNode = false;
+    this.visited = false;
 
     this.display = function () {
         if (this.isStartNode) {
@@ -85,7 +188,7 @@ function Node(x, y, color) {
         }
         graphics.beginFill(this.color); // Purple
         graphics.lineStyle(5, 0x000000);
-        graphics.drawRect(this.x, this.y, nodeSize, nodeSize); // drawRect(x, y, width, height)
+        graphics.drawRect(this.x * nodeSize, this.y * nodeSize, nodeSize, nodeSize); // drawRect(x, y, width, height)
         graphics.endFill();
     }
 }
