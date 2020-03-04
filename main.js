@@ -75,68 +75,17 @@ function init() {
 
         }
     }
-    startNode = nodes[2][2];
+    startNode = nodes[15][15];
     startNode.color = 0xFFFF00;
-    endNode = nodes[15][15];
+    endNode = nodes[2][2];
     endNode.color = 0xFF0000;
 
     queue = new Queue();
     startNode.visited = true;
     queue.enqueue(startNode);
 
-    breadthFirst();
-
     loop(); //just render graphics on load instantly
-    var myVar = setInterval(loop, 16); //cause game loop to iterate every 500ms
-}
-
-
-
-function getAdjacents(nod) {
-    var list = [];
-    if (nod.x > 0)
-        list.push(nodes[nod.x - 1][nod.y]);
-    if (nod.y > 0)
-        list.push(nodes[nod.x][nod.y - 1]);
-    if (nod.x < boardW - 1)
-        list.push(nodes[nod.x + 1][nod.y]);
-    if (nod.y < boardH - 1)
-        list.push(nodes[nod.x][nod.y + 1]);
-    console.log(list);
-    return list;
-}
-
-
-function breadthFirst() {
-    if (!queue.isEmpty()) {
-        s = queue.dequeue();
-        console.log(s);
-        if (s === endNode) {
-            console.log("finished!!");
-            finished = true;
-        }
-        if (s.x > 0 && !nodes[s.x - 1][s.y].visited) {
-            nodes[s.x - 1][s.y].visited = true;
-            nodes[s.x - 1][s.y].color = 0x00FF00;
-            queue.enqueue(nodes[s.x - 1][s.y]);
-        }
-        if (s.y > 0 && !nodes[s.x][s.y - 1].visited) {
-            nodes[s.x][s.y - 1].visited = true;
-            nodes[s.x][s.y - 1].color = 0x00FF00;
-            queue.enqueue(nodes[s.x][s.y - 1]);
-        }
-        if (s.x < boardW - 1 && !nodes[s.x + 1][s.y].visited) {
-            nodes[s.x + 1][s.y].color = 0x00FF00;
-            nodes[s.x + 1][s.y].visited = true;
-            queue.enqueue(nodes[s.x + 1][s.y]);
-        }
-        if (s.y < boardH - 1 && !nodes[s.x][s.y + 1].visited) {
-            nodes[s.x][s.y + 1].visited = true;
-            nodes[s.x][s.y + 1].color = 0x00FF00;
-            queue.enqueue(nodes[s.x][s.y + 1]);
-        }
-    }
-
+    var myVar = setInterval(loop, 16); //cause game loop 60fps -> 16ms
 }
 
 function update(progress) {
@@ -150,7 +99,6 @@ function draw() {
 
     for (var i = 0; i < nodes.length; i++) {   //draw every node each game loop
         for (var j = 0; j < nodes[1].length; j++) {
-            //nodes[i][j].color = Math.floor(Math.random() * 16777215);
             nodes[i][j].display();
         }
     }
@@ -158,18 +106,51 @@ function draw() {
 }
 
 function loop(progress) {
-    //console.log(mousePosition);
     update(progress);
     draw();
     renderer.render(stage);
 }
 
+
+function breadthFirst() {
+    if (!queue.isEmpty()) {
+        s = queue.dequeue();
+        console.log(s);
+        if (s === endNode) {
+            console.log("finished!!");
+            finished = true;
+        } else {
+            if (s.x > 0 && !nodes[s.x - 1][s.y].visited && !nodes[s.x - 1][s.y].isBoundaryNode) {
+                nodes[s.x - 1][s.y].visited = true;
+                nodes[s.x - 1][s.y].color = 0x00FF00;
+                queue.enqueue(nodes[s.x - 1][s.y]);
+            }
+            if (s.y > 0 && !nodes[s.x][s.y - 1].visited && !nodes[s.x][s.y - 1].isBoundaryNode) {
+                nodes[s.x][s.y - 1].visited = true;
+                nodes[s.x][s.y - 1].color = 0x00FF00;
+                queue.enqueue(nodes[s.x][s.y - 1]);
+            }
+            if (s.x < boardW - 1 && !nodes[s.x + 1][s.y].visited && !nodes[s.x + 1][s.y].isBoundaryNode) {
+                nodes[s.x + 1][s.y].color = 0x00FF00;
+                nodes[s.x + 1][s.y].visited = true;
+                queue.enqueue(nodes[s.x + 1][s.y]);
+            }
+            if (s.y < boardH - 1 && !nodes[s.x][s.y + 1].visited && !nodes[s.x][s.y + 1].isBoundaryNode) {
+                nodes[s.x][s.y + 1].visited = true;
+                nodes[s.x][s.y + 1].color = 0x00FF00;
+                queue.enqueue(nodes[s.x][s.y + 1]);
+            }
+        }
+    }
+
+}
+
 function mousedown(event) {
-    nodes[Math.floor(event.x / nodeSize)][Math.floor(event.y / nodeSize)].color = 0x00FF00;
+    nodes[Math.floor(event.x / nodeSize)][Math.floor(event.y / nodeSize)].color = 0x555555;
+    nodes[Math.floor(event.x / nodeSize)][Math.floor(event.y / nodeSize)].isBoundaryNode = true;
     draw();
     renderer.render(stage);
 }
-
 document.addEventListener('mousedown', mousedown);
 
 //The object Node will make up the board
