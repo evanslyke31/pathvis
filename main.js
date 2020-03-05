@@ -149,46 +149,23 @@ function triggerBreadthFirst() {
 function breadthFirst() {
     if (!queue.isEmpty()) {
         s = queue.dequeue();
-        //console.log(s);
         if (s !== startNode && s !== endNode)
             s.color = 0x00FF00;
         if (s === endNode) {
             console.log("finished!!");
-            finished = true;
             bfSelect = false;
             drawPath();
         } else {
-            if (s.x > 0 && !nodes[s.x - 1][s.y].visited && !nodes[s.x - 1][s.y].isBoundaryNode) {
-                nodes[s.x - 1][s.y].visited = true;
-                nodes[s.x - 1][s.y].weight = s.weight + 1;
-                if (nodes[s.x - 1][s.y] !== endNode)
-                    nodes[s.x - 1][s.y].color = 0xA1FF96;
-                queue.enqueue(nodes[s.x - 1][s.y]);
-            }
-            if (s.y > 0 && !nodes[s.x][s.y - 1].visited && !nodes[s.x][s.y - 1].isBoundaryNode) {
-                nodes[s.x][s.y - 1].visited = true;
-                nodes[s.x][s.y - 1].weight = s.weight + 1;
-                if (nodes[s.x][s.y - 1] !== endNode)
-                    nodes[s.x][s.y - 1].color = 0xA1FF96;
-                queue.enqueue(nodes[s.x][s.y - 1]);
-            }
-            if (s.x < boardW - 1 && !nodes[s.x + 1][s.y].visited && !nodes[s.x + 1][s.y].isBoundaryNode) {
-                if (nodes[s.x + 1][s.y] !== endNode)
-                    nodes[s.x + 1][s.y].color = 0xA1FF96;
-                nodes[s.x + 1][s.y].visited = true;
-                nodes[s.x + 1][s.y].weight = s.weight + 1;
-                queue.enqueue(nodes[s.x + 1][s.y]);
-            }
-            if (s.y < boardH - 1 && !nodes[s.x][s.y + 1].visited && !nodes[s.x][s.y + 1].isBoundaryNode) {
-                nodes[s.x][s.y + 1].visited = true;
-                nodes[s.x][s.y + 1].weight = s.weight + 1;
-                if (nodes[s.x][s.y + 1] !== endNode)
-                    nodes[s.x][s.y + 1].color = 0xA1FF96;
-                queue.enqueue(nodes[s.x][s.y + 1]);
+            var neigbors = s.getNeighbors();
+            for (var i = 0; i < neigbors.length; i++) {
+                neigbors[i].visited = true;
+                neigbors[i].weight = s.weight + 1;
+                if (neigbors[i] !== endNode)
+                    neigbors[i].color = 0xA1FF96;
+                queue.enqueue(neigbors[i]);
             }
         }
     }
-
 }
 
 /*############################################ [Swarm Section] ##################################################*/
@@ -203,6 +180,7 @@ function swarm() {
 
 }
 
+/*########################################### [Supporting Functions] ###############################################*/
 function drawPath() {
     var currentNode = endNode;
     var closest = currentNode;
@@ -223,46 +201,6 @@ function drawPath() {
         currentNode = closest;
     }
 }
-
-window.addEventListener('mousedown', function (e) {
-    if (e.y > controlHeight) {
-        if (e.button == 0) {
-            isLeftDown = true;
-        } else if (e.button == 2) {
-            isRightDown = true;
-        }
-        hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
-        if ((isLeftDown || isRightDown) && hoveredNode !== endNode && hoveredNode !== startNode) {
-            if (!hoveredNode.isBoundaryNode && isLeftDown) {
-                hoveredNode.color = 0x555555;
-                hoveredNode.isBoundaryNode = true;
-            } else if (isRightDown) {
-                hoveredNode.color = 0xFFFFFF;
-                hoveredNode.isBoundaryNode = false;
-            }
-        }
-    }
-});
-
-window.addEventListener('mousemove', function (e) {
-    if ((isLeftDown || isRightDown)) {
-        hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
-        if (hoveredNode !== endNode && hoveredNode !== startNode) {
-            if (!hoveredNode.isBoundaryNode && isLeftDown) {
-                hoveredNode.color = 0x555555;
-                hoveredNode.isBoundaryNode = true;
-            } else if (isRightDown) {
-                hoveredNode.color = 0xFFFFFF;
-                hoveredNode.isBoundaryNode = false;
-            }
-        }
-    }
-});
-
-window.addEventListener('mouseup', function (e) {
-    isLeftDown = isRightDown = false;
-});
-
 
 function clearBoard(fullClear) {
     for (var i = 0; i < nodes.length; i++) {   //fill nodes with node objects
@@ -303,5 +241,61 @@ function Node(x, y, color) {
         graphics.drawRect(this.x * nodeSize, (this.y) * nodeSize, nodeSize, nodeSize); // drawRect(x, y, width, height)
         graphics.endFill();
     }
+
+    this.getNeighbors = function () {
+        var list = [];
+        if (this.x > 0 && !nodes[this.x - 1][this.y].visited && !nodes[this.x - 1][this.y].isBoundaryNode) {
+            list.push(nodes[this.x - 1][this.y]);
+        }
+        if (this.y > 0 && !nodes[this.x][this.y - 1].visited && !nodes[this.x][this.y - 1].isBoundaryNode) {
+            list.push(nodes[this.x][this.y - 1]);
+        }
+        if (this.x < boardW - 1 && !nodes[this.x + 1][this.y].visited && !nodes[this.x + 1][this.y].isBoundaryNode) {
+            list.push(nodes[this.x + 1][this.y]);
+        }
+        if (this.y < boardH - 1 && !nodes[this.x][this.y + 1].visited && !nodes[this.x][this.y + 1].isBoundaryNode) {
+            list.push(nodes[this.x][this.y + 1]);
+        }
+        return list;
+    }
 }
+
+window.addEventListener('mousedown', function (e) {
+    if (e.y > controlHeight) {
+        hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
+        if (e.button == 0) {
+            isLeftDown = true;
+        } else if (e.button == 2) {
+            isRightDown = true;
+        }
+        if ((isLeftDown || isRightDown) && hoveredNode !== endNode && hoveredNode !== startNode) {
+            if (!hoveredNode.isBoundaryNode && isLeftDown) {
+                hoveredNode.color = 0x555555;
+                hoveredNode.isBoundaryNode = true;
+            } else if (isRightDown) {
+                hoveredNode.color = 0xFFFFFF;
+                hoveredNode.isBoundaryNode = false;
+            }
+        }
+    }
+});
+
+window.addEventListener('mousemove', function (e) {
+    if ((isLeftDown || isRightDown)) {
+        hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
+        if (hoveredNode !== endNode && hoveredNode !== startNode) {
+            if (!hoveredNode.isBoundaryNode && isLeftDown) {
+                hoveredNode.color = 0x555555;
+                hoveredNode.isBoundaryNode = true;
+            } else if (isRightDown) {
+                hoveredNode.color = 0xFFFFFF;
+                hoveredNode.isBoundaryNode = false;
+            }
+        }
+    }
+});
+
+window.addEventListener('mouseup', function (e) {
+    isLeftDown = isRightDown = false;
+});
 
