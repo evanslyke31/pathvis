@@ -4,7 +4,7 @@ var renderer = PIXI.autoDetectRenderer(200, 200, { backgroundColor: 0x000000 });
 renderer.resize(window.innerWidth, window.innerHeight - document.getElementById('control').offsetHeight - 4);
 document.body.appendChild(renderer.view);
 stage.addChild(graphics);
-document.addEventListener('mousedown', mousedown);
+document.addEventListener('contextmenu', event => event.preventDefault());
 
 class Queue {
     constructor() {
@@ -43,6 +43,7 @@ var startNode, endNode;
 var dijSelect, astarSelect, bfSelect, swarmSelect;
 var controlHeight;
 var startNodeX, startNodeY, endNodeX, endNodeY;
+var isLeftDown, isRightDown;
 
 //Used for breadthFirst
 var queue;
@@ -60,6 +61,7 @@ function init() {
     startNodeY = 10;
     endNodeX = 30;
     endNodeY = 10;
+    isLeftDown = isRightDown = false;
 
     for (var i = 0; i < boardW; i++) {
         nodes[i] = [];
@@ -222,19 +224,45 @@ function drawPath() {
     }
 }
 
-function mousedown(event) {
-    if (event.y > controlHeight) {
-        if (!nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode) {
-            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].color = 0x555555;
-            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode = true;
-        } else {
-            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].color = 0xFFFFFF;
-            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode = false;
+window.addEventListener('mousedown', function (e) {
+    if (e.y > controlHeight) {
+        if (e.button == 0) {
+            isLeftDown = true;
+        } else if (e.button == 2) {
+            isRightDown = true;
         }
-        draw();
-        renderer.render(stage);
+        hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
+        if ((isLeftDown || isRightDown) && hoveredNode !== endNode && hoveredNode !== startNode) {
+            if (!hoveredNode.isBoundaryNode && isLeftDown) {
+                hoveredNode.color = 0x555555;
+                hoveredNode.isBoundaryNode = true;
+            } else if (isRightDown) {
+                hoveredNode.color = 0xFFFFFF;
+                hoveredNode.isBoundaryNode = false;
+            }
+        }
     }
-}
+});
+
+window.addEventListener('mousemove', function (e) {
+    if ((isLeftDown || isRightDown)) {
+        hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
+        if (hoveredNode !== endNode && hoveredNode !== startNode) {
+            if (!hoveredNode.isBoundaryNode && isLeftDown) {
+                hoveredNode.color = 0x555555;
+                hoveredNode.isBoundaryNode = true;
+            } else if (isRightDown) {
+                hoveredNode.color = 0xFFFFFF;
+                hoveredNode.isBoundaryNode = false;
+            }
+        }
+    }
+});
+
+window.addEventListener('mouseup', function (e) {
+    isLeftDown = isRightDown = false;
+});
+
 
 function clearBoard(fullClear) {
     for (var i = 0; i < nodes.length; i++) {   //fill nodes with node objects
