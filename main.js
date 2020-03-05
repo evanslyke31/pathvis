@@ -60,7 +60,6 @@ function init() {
     startNodeY = 10;
     endNodeX = 30;
     endNodeY = 10;
-    globalRGB = 0;
 
     for (var i = 0; i < boardW; i++) {
         nodes[i] = [];
@@ -85,15 +84,14 @@ function init() {
 }
 
 function update(progress) {
-    globalRGB += 1;
     if (bfSelect)
         breadthFirst();
-    /*else if (dijSelect)
+    else if (dijSelect)
         dij();
     else if (astarSelect)
         AStar();
     else if (swarmSelect)
-        swarm();*/
+        swarm();
 }
 
 function draw() {
