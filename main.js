@@ -73,6 +73,7 @@ function init() {
 
         }
     }
+
     startNode = nodes[startNodeX][startNodeY];
     startNode.color = 0xFFFF00;
     startNode.weight = 0;
@@ -204,7 +205,7 @@ function drawPath() {
     var currentNode = endNode;
     var closest = currentNode;
     while (currentNode !== startNode) {
-        if (currentNode.y < boardH && nodes[currentNode.x][currentNode.y + 1].weight < closest.weight && !nodes[currentNode.x][currentNode.y + 1].isBoundaryNode) {
+        if (currentNode.y < boardH - 1 && nodes[currentNode.x][currentNode.y + 1].weight < closest.weight && !nodes[currentNode.x][currentNode.y + 1].isBoundaryNode) {
             closest = nodes[currentNode.x][currentNode.y + 1];
         }
         if (currentNode.x > 0 && nodes[currentNode.x - 1][currentNode.y].weight < closest.weight && !nodes[currentNode.x - 1][currentNode.y].isBoundaryNode) {
@@ -223,8 +224,13 @@ function drawPath() {
 
 function mousedown(event) {
     if (event.y > controlHeight) {
-        nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].color = 0x555555;
-        nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode = true;
+        if (!nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode) {
+            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].color = 0x555555;
+            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode = true;
+        } else {
+            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].color = 0xFFFFFF;
+            nodes[Math.floor(event.x / nodeSize)][Math.floor((event.y - controlHeight) / nodeSize)].isBoundaryNode = false;
+        }
         draw();
         renderer.render(stage);
     }
@@ -234,6 +240,7 @@ function clearBoard(fullClear) {
     for (var i = 0; i < nodes.length; i++) {   //fill nodes with node objects
         for (var j = 0; j < nodes[1].length; j++) {   //fill nodes with node objects
             nodes[i][j].visited = false;
+            nodes[i][j].weight = 9999;
             if (nodes[i][j] !== startNode && nodes[i][j] !== endNode) {
                 if (fullClear && nodes[i][j].isBoundaryNode) {
                     nodes[i][j].isBoundaryNode = false;
@@ -269,3 +276,4 @@ function Node(x, y, color) {
         graphics.endFill();
     }
 }
+
