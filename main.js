@@ -54,7 +54,7 @@ function init() {
     nodes = [];
     boardW = 39;
     boardH = 20;
-    dijSelect = astarSelect = bfSelect = swarmSelect = false;;
+    dijSelect = astarSelect = bfSelect = swarmSelect = false;
     controlHeight = document.getElementById('control').offsetHeight;
     startNodeX = 5;
     startNodeY = 10;
