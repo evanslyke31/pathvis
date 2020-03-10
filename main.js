@@ -300,35 +300,7 @@ window.addEventListener('mousedown', function (e) {
     }
 });
 
-window.addEventListener('touchstart', function (e) {
-    console.log(e);
-    if (e.y > controlHeight) {
-        hoveredNode = nodes[Math.floor(e.touches[0].clientX / nodeSize)][Math.floor((e.touches[0].clientX - controlHeight) / nodeSize)];
-        if (hoveredNode !== endNode && hoveredNode !== startNode) {
-            if (!hoveredNode.isBoundaryNode) {
-                hoveredNode.color = 0x555555;
-                hoveredNode.isBoundaryNode = true;
-            } else {
-                hoveredNode.color = 0xFFFFFF;
-                hoveredNode.isBoundaryNode = false;
-            }
-        }
-    }
-});
-
-window.addEventListener('touchmove', function (e) {
-    console.log(e);
-    hoveredNode = nodes[Math.floor(e.touches[0].clientX / nodeSize)][Math.floor((e.touches[0].clientY - controlHeight) / nodeSize)];
-    if (hoveredNode !== endNode && hoveredNode !== startNode) {
-        if (!hoveredNode.isBoundaryNode) {
-            hoveredNode.color = 0x555555;
-            hoveredNode.isBoundaryNode = true;
-        }
-
-        //moves start and end node location by dragging them
-    }
-});
-
+//moves start and end node location by dragging them
 window.addEventListener('mousemove', function (e) {
     //draws boundaries or clears them if mouse drags over a node
     if ((isLeftDown || isRightDown)) {
@@ -370,3 +342,55 @@ window.addEventListener('mouseup', function (e) {
         endNodeSelected = false;
 });
 
+//Mobile controls
+window.addEventListener('touchstart', function (e) {
+    if (e.changedTouches[0].pageY > controlHeight) {
+        hoveredNode = nodes[Math.floor(e.changedTouches[0].pageX / nodeSize)][Math.floor((e.changedTouches[0].pageY - controlHeight) / nodeSize)];
+        if (hoveredNode !== endNode && hoveredNode !== startNode) {
+            if (!hoveredNode.isBoundaryNode) {
+                hoveredNode.color = 0x555555;
+                hoveredNode.isBoundaryNode = true;
+            } else {
+                hoveredNode.color = 0xFFFFFF;
+                hoveredNode.isBoundaryNode = false;
+            }
+        } else if (hoveredNode === startNode && !isRunning()) {
+            startNodeSelected = true;
+        } else if (hoveredNode === endNode && !isRunning()) {
+            endNodeSelected = true;
+        }
+    }
+});
+
+window.addEventListener('touchmove', function (e) {
+    hoveredNode = nodes[Math.floor(e.touches[0].clientX / nodeSize)][Math.floor((e.touches[0].clientY - controlHeight) / nodeSize)];
+    if (hoveredNode !== endNode && hoveredNode !== startNode && !startNodeSelected && !endNodeSelected) {
+        if (!hoveredNode.isBoundaryNode) {
+            hoveredNode.color = 0x555555;
+            hoveredNode.isBoundaryNode = true;
+        }
+
+    } else if (startNodeSelected && !hoveredNode.isBoundaryNode && hoveredNode !== endNode) {
+        startNode.color = 0xFFFFFF;
+        startNode = hoveredNode;
+        startNodeX = Math.floor(e.touches[0].clientX / nodeSize);
+        startNodeY = Math.floor((e.touches[0].clientY - controlHeight) / nodeSize);
+        startNode = nodes[startNodeX][startNodeY];
+        startNode.color = 0xFFFF00;
+        startNode.weight = 0;
+    } else if (endNodeSelected && !hoveredNode.isBoundaryNode && hoveredNode !== startNode) {
+        endNode.color = 0xFFFFFF;
+        endNode = hoveredNode;
+        endNodeX = Math.floor(e.touches[0].clientX / nodeSize);
+        endNodeY = Math.floor((e.touches[0].clientY - controlHeight) / nodeSize);
+        endNode = nodes[endNodeX][endNodeY];
+        endNode.color = 0xFF0000;
+    }
+});
+
+window.addEventListener('touchend', function (e) {
+    if (startNodeSelected)
+        startNodeSelected = false;
+    if (endNodeSelected)
+        endNodeSelected = false;
+});
