@@ -294,8 +294,10 @@ window.addEventListener('mousedown', function (e) {
             //allows mouse move to change the location of start and end node
         } else if (isLeftDown && hoveredNode === startNode && !isRunning()) {
             startNodeSelected = true;
+            clearBoard(false);
         } else if (isLeftDown && hoveredNode === endNode && !isRunning()) {
             endNodeSelected = true;
+            clearBoard(false);
         }
     }
 });
@@ -356,8 +358,10 @@ window.addEventListener('touchstart', function (e) {
             }
         } else if (hoveredNode === startNode && !isRunning()) {
             startNodeSelected = true;
+            clearBoard(false);
         } else if (hoveredNode === endNode && !isRunning()) {
             endNodeSelected = true;
+            clearBoard(false);
         }
     }
 });
