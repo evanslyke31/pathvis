@@ -44,6 +44,7 @@ var dijSelect, astarSelect, bfSelect, swarmSelect;
 var controlHeight;
 var startNodeX, startNodeY, endNodeX, endNodeY;
 var isLeftDown, isRightDown;
+var startNodeSelected, endNodeSelected;
 
 //Used for breadthFirst
 var queue;
@@ -62,6 +63,7 @@ function init() {
     endNodeX = 30;
     endNodeY = 10;
     isLeftDown = isRightDown = false;
+    startNodeSelected = endNodeSelected = false;
 
     for (var i = 0; i < boardW; i++) {
         nodes[i] = [];
@@ -181,6 +183,7 @@ function swarm() {
 }
 
 /*########################################### [Supporting Functions] ###############################################*/
+//traces the least cost past by following the least weighted nodes of its neighbors
 function drawPath() {
     var currentNode = endNode;
     var closest = currentNode;
@@ -202,9 +205,10 @@ function drawPath() {
     }
 }
 
+//a full clear true will clear all boundary nodes, and a false full clear will only clear visited nodes
 function clearBoard(fullClear) {
-    for (var i = 0; i < nodes.length; i++) {   //fill nodes with node objects
-        for (var j = 0; j < nodes[1].length; j++) {   //fill nodes with node objects
+    for (var i = 0; i < nodes.length; i++) {
+        for (var j = 0; j < nodes[1].length; j++) {
             nodes[i][j].visited = false;
             nodes[i][j].weight = 9999;
             if (nodes[i][j] !== startNode && nodes[i][j] !== endNode) {
@@ -242,22 +246,28 @@ function Node(x, y, color) {
         graphics.endFill();
     }
 
+    //returns a list of all adjacent nodes
     this.getNeighbors = function () {
         var list = [];
         if (this.x > 0 && !nodes[this.x - 1][this.y].visited && !nodes[this.x - 1][this.y].isBoundaryNode) {
-            list.push(nodes[this.x - 1][this.y]);
+            list = [...list, nodes[this.x - 1][this.y]];
         }
         if (this.y > 0 && !nodes[this.x][this.y - 1].visited && !nodes[this.x][this.y - 1].isBoundaryNode) {
-            list.push(nodes[this.x][this.y - 1]);
+            list = [...list, nodes[this.x][this.y - 1]];
         }
         if (this.x < boardW - 1 && !nodes[this.x + 1][this.y].visited && !nodes[this.x + 1][this.y].isBoundaryNode) {
-            list.push(nodes[this.x + 1][this.y]);
+            list = [...list, nodes[this.x + 1][this.y]];
         }
         if (this.y < boardH - 1 && !nodes[this.x][this.y + 1].visited && !nodes[this.x][this.y + 1].isBoundaryNode) {
-            list.push(nodes[this.x][this.y + 1]);
+            list = [...list, nodes[this.x][this.y + 1]];
         }
         return list;
     }
+}
+
+//check if any algorithms from running so board does not break when moving start and end nodes
+function isRunning() {
+    return (dijSelect || astarSelect || bfSelect || swarmSelect);
 }
 
 window.addEventListener('mousedown', function (e) {
@@ -268,6 +278,7 @@ window.addEventListener('mousedown', function (e) {
         } else if (e.button == 2) {
             isRightDown = true;
         }
+        //selecting boundary nodes
         if ((isLeftDown || isRightDown) && hoveredNode !== endNode && hoveredNode !== startNode) {
             if (!hoveredNode.isBoundaryNode && isLeftDown) {
                 hoveredNode.color = 0x555555;
@@ -276,14 +287,24 @@ window.addEventListener('mousedown', function (e) {
                 hoveredNode.color = 0xFFFFFF;
                 hoveredNode.isBoundaryNode = false;
             }
+            //allows mouse move to change the location of start and end node
+        } else if (isLeftDown && hoveredNode === startNode && !isRunning()) {
+            startNodeSelected = true;
+        } else if (isLeftDown && hoveredNode === endNode && !isRunning()) {
+            endNodeSelected = true;
         }
     }
 });
 
+document.body.addEventListener('touchstart', function (e) {
+    alert(e.changedTouches[0].pageX) // alert pageX coordinate of touch point
+});
+
 window.addEventListener('mousemove', function (e) {
+    //draws boundaries or clears them if mouse drags over a node
     if ((isLeftDown || isRightDown)) {
         hoveredNode = nodes[Math.floor(e.x / nodeSize)][Math.floor((e.y - controlHeight) / nodeSize)];
-        if (hoveredNode !== endNode && hoveredNode !== startNode) {
+        if (hoveredNode !== endNode && hoveredNode !== startNode && !startNodeSelected && !endNodeSelected) {
             if (!hoveredNode.isBoundaryNode && isLeftDown) {
                 hoveredNode.color = 0x555555;
                 hoveredNode.isBoundaryNode = true;
@@ -291,11 +312,32 @@ window.addEventListener('mousemove', function (e) {
                 hoveredNode.color = 0xFFFFFF;
                 hoveredNode.isBoundaryNode = false;
             }
+
+            //moves start and end node location by dragging them
+        } else if (startNodeSelected && !hoveredNode.isBoundaryNode && hoveredNode !== endNode) {
+            startNode.color = 0xFFFFFF;
+            startNode = hoveredNode;
+            startNodeX = Math.floor(e.x / nodeSize);
+            startNodeY = Math.floor((e.y - controlHeight) / nodeSize);
+            startNode = nodes[startNodeX][startNodeY];
+            startNode.color = 0xFFFF00;
+            startNode.weight = 0;
+        } else if (endNodeSelected && !hoveredNode.isBoundaryNode && hoveredNode !== startNode) {
+            endNode.color = 0xFFFFFF;
+            endNode = hoveredNode;
+            endNodeX = Math.floor(e.x / nodeSize);
+            endNodeY = Math.floor((e.y - controlHeight) / nodeSize);
+            endNode = nodes[endNodeX][endNodeY];
+            endNode.color = 0xFF0000;
         }
     }
 });
 
 window.addEventListener('mouseup', function (e) {
     isLeftDown = isRightDown = false;
+    if (startNodeSelected)
+        startNodeSelected = false;
+    if (endNodeSelected)
+        endNodeSelected = false;
 });
 
