@@ -20,7 +20,7 @@ html, body {
   *display: inline;
   zoom: 1;
   padding: 6px 20px;
-  margin: 0;
+  margin: 3px;
   cursor: pointer;
   border: 1px solid #bbb;
   overflow: visible;
@@ -28,6 +28,7 @@ html, body {
   text-decoration: none;
   white-space: nowrap;
   color: #555;
+
   
   background-color: #ddd;
   background-image: -webkit-gradient(linear, left top, left bottom, from(rgba(255,255,255,1)), to(rgba(255,255,255,0)));
@@ -243,4 +244,16 @@ html, body {
   -moz-box-shadow: 0 0 1px rgba(0, 0, 0, .2) inset, 5px 0 5px -3px rgba(0, 0, 0, .2) inset;
   -webkit-box-shadow: 0 0 1px rgba(0, 0, 0, .2) inset, 5px 0 5px -3px rgba(0, 0, 0, .2) inset;
   box-shadow: 0 0 1px rgba(0, 0, 0, .2) inset, 5px 0 5px -3px rgba(0, 0, 0, .2) inset;
+}
+
+@media screen and (max-width:1024px) {
+    .button {
+      width: 19%;
+      font: bold 17px arial, helvetica, sans-serif;
+    }
+
+  .button.large{
+  padding: 30px 30px;
+  text-transform: uppercase;
+}
 }
