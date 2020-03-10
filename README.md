@@ -1,6 +1,6 @@
 # pathvis
 [LIVE VERSION HERE](https://evanslyke31.github.io/pathvis)
-![Gif of Breadth first search](https://imgur.com/a/Tumj4zb)
+![Gif of Breadth first search](https://i.imgur.com/JVmvnIx.gif)
 
 Controls -
   Left mouse down -> place boundary
