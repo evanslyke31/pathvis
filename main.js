@@ -52,25 +52,29 @@ var s;
 
 init();
 function init() {
-    yvel = 0;
     nodes = [];
-    boardW = 39;
-    boardH = 20;
-    dijSelect = astarSelect = bfSelect = swarmSelect = false;
     controlHeight = document.getElementById('control').offsetHeight;
-    startNodeX = 5;
-    startNodeY = 10;
-    endNodeX = 30;
-    endNodeY = 10;
+    screenWidth = window.innerWidth;
+    screenHeight = window.innerHeight - controlHeight - 4;
+    if (screenWidth > 1900)
+        nodeSize = screenWidth / 40;
+    else if (screenWidth > 1000)
+        nodeSize = screenWidth / 30;
+    else
+        nodeSize = screenWidth / 14;
+    boardW = Math.floor(screenWidth / nodeSize);
+    boardH = Math.floor(screenHeight / nodeSize);
+    dijSelect = astarSelect = bfSelect = swarmSelect = false;
+    startNodeX = 3;
+    startNodeY = 3;
+    endNodeX = boardW - 3;
+    endNodeY = boardH - 3;
     isLeftDown = isRightDown = false;
     startNodeSelected = endNodeSelected = false;
 
     for (var i = 0; i < boardW; i++) {
         nodes[i] = [];
     }
-    screenWidth = window.innerWidth;
-    screenHeight = window.innerHeight - controlHeight - 4;
-    nodeSize = screenHeight / boardH;
     for (var i = 0; i < nodes.length; i++) {   //fill nodes with node objects
         for (var j = 0; j < boardH; j++) {   //fill nodes with node objects
             nodes[i][j] = (new Node(i, j, 0xFFFFFF));
@@ -241,7 +245,7 @@ function Node(x, y, color) {
 
     this.display = function () {
         graphics.beginFill(this.color);
-        graphics.lineStyle(5, 0x000000);
+        graphics.lineStyle(3, 0x000000);
         graphics.drawRect(this.x * nodeSize, (this.y) * nodeSize, nodeSize, nodeSize); // drawRect(x, y, width, height)
         graphics.endFill();
     }
@@ -296,8 +300,33 @@ window.addEventListener('mousedown', function (e) {
     }
 });
 
-document.body.addEventListener('touchstart', function (e) {
-    alert(e.changedTouches[0].pageX) // alert pageX coordinate of touch point
+window.addEventListener('touchstart', function (e) {
+    console.log(e);
+    if (e.y > controlHeight) {
+        hoveredNode = nodes[Math.floor(e.touches[0].clientX / nodeSize)][Math.floor((e.touches[0].clientX - controlHeight) / nodeSize)];
+        if (hoveredNode !== endNode && hoveredNode !== startNode) {
+            if (!hoveredNode.isBoundaryNode) {
+                hoveredNode.color = 0x555555;
+                hoveredNode.isBoundaryNode = true;
+            } else {
+                hoveredNode.color = 0xFFFFFF;
+                hoveredNode.isBoundaryNode = false;
+            }
+        }
+    }
+});
+
+window.addEventListener('touchmove', function (e) {
+    console.log(e);
+    hoveredNode = nodes[Math.floor(e.touches[0].clientX / nodeSize)][Math.floor((e.touches[0].clientY - controlHeight) / nodeSize)];
+    if (hoveredNode !== endNode && hoveredNode !== startNode) {
+        if (!hoveredNode.isBoundaryNode) {
+            hoveredNode.color = 0x555555;
+            hoveredNode.isBoundaryNode = true;
+        }
+
+        //moves start and end node location by dragging them
+    }
 });
 
 window.addEventListener('mousemove', function (e) {
