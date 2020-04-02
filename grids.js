@@ -1,4 +1,5 @@
-var setMaze = function () {
+var blocks = []
+function setMaze() {
 	clearBoard(true);
 	blocks = [];
 	for (var i = 0; i < boardW; i++) {
@@ -10,33 +11,45 @@ var setMaze = function () {
 
 		}
 	}
-	for (var i = Math.floor(boardW / 10); i < boardW; i += Math.floor(boardW / 10)) {
-		for (j = 0; j < boardH; j++) {
-			if (Math.random() * 10 > 2) {
-				blocks[i][j].color = 0x555555;
-				blocks[i][j].isBoundaryNode = true;
-			}
-		}
-	}
-	for (var i = Math.floor(boardH / 6); i < boardH; i += Math.floor(boardH / 6)) {
-		for (j = 0; j < boardW; j++) {
-			if (Math.random() * 10 > 6) {
-				blocks[j][i].color = 0x555555;
-				blocks[j][i].isBoundaryNode = true;
-			}
-		}
-	}
+	setMazeHelper(0, 0, boardW, boardH)
 
 	nodes = blocks;
-	startNodeX = 1;
-	startNodeY = Math.floor(boardH / 2);
-	endNodeX = boardW - 2;
-	endNodeY = Math.floor(boardH / 2);
+	startNodeX = 0;
+	startNodeY = 0;
+	endNodeX = boardW - 1;
+	endNodeY = boardH - 1;
 	startNode = nodes[startNodeX][startNodeY];
 	startNode.color = 0xFFFF00;
 	startNode.weight = 0;
 	endNode = nodes[endNodeX][endNodeY];
 	endNode.color = 0xFF0000;
+}
+
+function setMazeHelper(x1, y1, x2, y2) {
+	console.log(blocks)
+	if (x2 - x1 > 2 && y2 - y1 > 2) {
+		let xint = Math.floor((x2 - x1) / 2) + x1;
+		let yint = Math.floor((y2 - y1) / 2) + y1;
+		let xhole = [Math.floor(Math.random() * (yint - y1)), Math.floor(Math.random() * (y2 - yint)) + yint]
+		let yhole = [Math.floor(Math.random() * (xint - x1)), Math.floor(Math.random() * (x2 - xint)) + xint]
+		for (var i = x1; i < x2; i++) {
+			if (!yhole.includes(i)) {
+				blocks[i][yint].color = 0x555555
+				blocks[i][yint].isBoundaryNode = true;
+			}
+		}
+		for (var i = y1; i < y2; i++) {
+			if (!xhole.includes(i)) {
+				blocks[xint][i].color = 0x555555
+				blocks[xint][i].isBoundaryNode = true;
+			}
+		}
+		//nodes = blocks;
+		setMazeHelper(x1, y1, xint, yint)
+		setMazeHelper(xint, y1 + 1, x2, yint)
+		setMazeHelper(x1, yint + 1, xint, y2)
+		setMazeHelper(xint + 1, yint + 1, x2, y2)
+	}
 }
 
 var setSnail = function () {
