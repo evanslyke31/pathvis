@@ -134,7 +134,7 @@ function breadthFirst() {
             bfSelect = false;
             drawPath();
         } else {
-            var neigbors = s.getNeighbors();
+            var neigbors = s.getNeighbors(false);
             for (var i = 0; i < neigbors.length; i++) {
                 neigbors[i].visited = true;
                 neigbors[i].weight = s.weight + 1;
@@ -164,18 +164,11 @@ function drawPath() {
     var currentNode = endNode;
     var closest = currentNode;
     while (currentNode !== startNode) {
-        if (currentNode.y < boardH - 1 && nodes[currentNode.x][currentNode.y + 1].weight < closest.weight && !nodes[currentNode.x][currentNode.y + 1].isBoundaryNode) {
-            closest = nodes[currentNode.x][currentNode.y + 1];
-        }
-        if (currentNode.x > 0 && nodes[currentNode.x - 1][currentNode.y].weight < closest.weight && !nodes[currentNode.x - 1][currentNode.y].isBoundaryNode) {
-            closest = nodes[currentNode.x - 1][currentNode.y];
-        }
-        if (currentNode.y > 0 && nodes[currentNode.x][currentNode.y - 1].weight < closest.weight && !nodes[currentNode.x][currentNode.y - 1].isBoundaryNode) {
-            closest = nodes[currentNode.x][currentNode.y - 1];
-        }
-        if (currentNode.x < boardW - 1 && nodes[currentNode.x + 1][currentNode.y].weight < closest.weight && !nodes[currentNode.x + 1][currentNode.y].isBoundaryNode) {
-            closest = nodes[currentNode.x + 1][currentNode.y];
-        }
+        neigbors = currentNode.getNeighbors(true)
+        console.log(neigbors)
+        for (var i = 0; i < neigbors.length; i++)
+            if (neigbors[i].weight < closest.weight)
+                closest = neigbors[i]
         currentNode.color = 0x0000FF;
         currentNode = closest;
     }
@@ -222,19 +215,19 @@ function Node(x, y, color) {
         graphics.endFill();
     }
 
-    //returns a list of all adjacent nodes
-    this.getNeighbors = function () {
+    //returns a list of all adjacent nodes, includeVisted set to false doesnt return visited nodes
+    this.getNeighbors = function (includeVisited) {
         var list = [];
-        if (this.x > 0 && !nodes[this.x - 1][this.y].visited && !nodes[this.x - 1][this.y].isBoundaryNode) {
+        if (this.x > 0 && (!nodes[this.x - 1][this.y].visited || includeVisited) && !nodes[this.x - 1][this.y].isBoundaryNode) {
             list = [...list, nodes[this.x - 1][this.y]];
         }
-        if (this.y > 0 && !nodes[this.x][this.y - 1].visited && !nodes[this.x][this.y - 1].isBoundaryNode) {
+        if (this.y > 0 && (!nodes[this.x][this.y - 1].visited || includeVisited) && !nodes[this.x][this.y - 1].isBoundaryNode) {
             list = [...list, nodes[this.x][this.y - 1]];
         }
-        if (this.x < boardW - 1 && !nodes[this.x + 1][this.y].visited && !nodes[this.x + 1][this.y].isBoundaryNode) {
+        if (this.x < boardW - 1 && (!nodes[this.x + 1][this.y].visited || includeVisited) && !nodes[this.x + 1][this.y].isBoundaryNode) {
             list = [...list, nodes[this.x + 1][this.y]];
         }
-        if (this.y < boardH - 1 && !nodes[this.x][this.y + 1].visited && !nodes[this.x][this.y + 1].isBoundaryNode) {
+        if (this.y < boardH - 1 && (!nodes[this.x][this.y + 1].visited || includeVisited) && !nodes[this.x][this.y + 1].isBoundaryNode) {
             list = [...list, nodes[this.x][this.y + 1]];
         }
         return list;
