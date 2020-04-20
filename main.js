@@ -165,7 +165,6 @@ function drawPath() {
     var closest = currentNode;
     while (currentNode !== startNode) {
         neigbors = currentNode.getNeighbors(true)
-        console.log(neigbors)
         for (var i = 0; i < neigbors.length; i++)
             if (neigbors[i].weight < closest.weight)
                 closest = neigbors[i]
