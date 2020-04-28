@@ -12,7 +12,7 @@ var screenWidth, screenHeight;
 var boardW, boardH;
 var nodeSize;
 var startNode, endNode;
-var dijSelect, astarSelect, bfSelect, swarmSelect;
+var dijSelect, astarSelect, bfSelect, swarmSelect, depthFirstSelect;
 var controlHeight;
 var startNodeX, startNodeY, endNodeX, endNodeY;
 var isLeftDown, isRightDown;
@@ -21,6 +21,12 @@ var startNodeSelected, endNodeSelected;
 //Used for breadthFirst
 var queue;
 var s;
+
+var stack;
+//For displaying
+var visitedQueue;
+
+var depthFirstRun;
 
 init();
 function init() {
@@ -73,6 +79,8 @@ function update(progress) {
         AStar();
     else if (swarmSelect)
         swarm();
+    else if (depthFirstSelect)
+        depthFirstDraw();
 }
 
 function draw() {
@@ -145,7 +153,127 @@ function breadthFirst() {
         }
     }
 }
+//Additional section -Patrick
+/*############################################ [Depth First Section] ########################################### */
+function triggerDepthFirst() {
+    clearBoard(false);
 
+
+    stack = new Stack();
+    visitedQueue = new Queue();
+    startNode.visited = true;
+    
+    stack.push(startNode);
+    depthFirstRun =true;
+
+    depthFirst();
+    depthFirstSelect=true;
+
+
+}
+function depthFirstDraw() {
+    while(!visitedQueue.isEmpty()) {
+        s =visitedQueue.dequeue();
+        if(s == startNode)
+            continue;
+        if(s == endNode)
+            continue;
+        s.color = 0x00FF00;
+    }
+    
+    depthFirstSelect=false;
+    drawPath();
+}
+function depthFirst() {
+    if(stack.isEmpty()) {
+        console.log("stack empty");
+        return;
+    }
+    if(depthFirstRun == false){
+        return;
+    }
+    s=stack.pop();
+    s.visited=true;
+    visitedQueue.enqueue(s);
+    if(s!== startNode && s!== endNode) {
+        //s.color = 0x00FF00;
+    }
+    if(s===endNode) {
+        console.log("DFS FINISHED");
+        depthFirstRun = false;
+        return;
+    }
+    else {
+        var neighbors = s.getNeighbors(false);
+        if(neighbors.length==0) {
+            console.log("no neighbors");
+            return;
+        }
+        else {
+            for(var i=0; i<neighbors.length; i++) {
+                if(neighbors[i].visited==true) {
+                    continue;
+                }
+                if(depthFirstRun == true) {
+                    neighbors[i].weight = s.weight+1;
+                    stack.push(neighbors[i]);
+                    depthFirst();
+                    if(depthFirstRun == false) {
+                        return;
+
+                    }
+                }
+                else {
+                    return;
+                }
+            }
+        }
+    }
+}
+
+/*
+function depthFirst() {
+    if(!stack.isEmpty() && depthFirstFinished==false) {
+        s=stack.pop();
+        s.visited=true;
+        //s.color= 0xA1FF96;
+        visitedStack.push(s);
+        if(s !== startNode && s !== endNode) {
+            s.color = 0x00FF00;
+        }
+        if(s === endNode) {
+            console.log("DFS Finished!!")
+            depthFirstFinished = true;
+            return;
+        }
+        else {
+            var neighbors = s.getNeighbors(false);
+            if(neighbors.length == 0) {
+                console.log("no neighbors");
+            }
+            else {
+                for (var i =0; i<neighbors.length; i++) {
+                    if(depthFirstFinished == true)
+                        return;
+                    if(neighbors[i].visited == false) {
+                        neighbors[i].weight = s.weight + 1;
+                        stack.push(neighbors[i]);
+                        depthFirst();
+                    }
+                }
+            }  
+        }
+    }
+    else {
+        console.log("Could not find end Node");
+        return;
+    }
+    
+} */
+
+
+
+//Note* I will be further researching this and try to implement. -Patrick
 /*############################################ [Swarm Section] ##################################################*/
 
 function triggerSwarm() {
@@ -195,7 +323,7 @@ function clearBoard(fullClear) {
     startNode.weight = 0;
     endNode = nodes[endNodeX][endNodeY];
     endNode.color = 0xFF0000;
-    dijSelect = astarSelect = bfSelect = swarmSelect = false;
+    dijSelect = astarSelect = bfSelect = swarmSelect = depthFirstSelect = false;
 }
 
 //The object Node will make up the board
@@ -235,7 +363,7 @@ function Node(x, y, color) {
 
 //check if any algorithms from running so board does not break when moving start and end nodes
 function isRunning() {
-    return (dijSelect || astarSelect || bfSelect || swarmSelect);
+    return (dijSelect || astarSelect || bfSelect || swarmSelect || depthFirstSelect);
 }
 
 /*########################### [ Supporting Data Structures ] ##################################*/
@@ -251,6 +379,28 @@ class Queue {
         if (this.isEmpty())
             return "Underflow";
         return this.items.shift();
+    }
+    isEmpty() {
+        return this.items.length == 0;
+    }
+}
+
+class Stack {
+    constructor() {
+        this.items = [];
+    }
+    push(element) {
+        this.items.push(element);
+    }
+    pop() {
+        var poppedElement;
+        if (this.isEmpty()) {
+            console.log("Underflow");
+            
+            return "Underflow";
+        }
+        poppedElement = this.items.pop();
+        return poppedElement;
     }
     isEmpty() {
         return this.items.length == 0;
