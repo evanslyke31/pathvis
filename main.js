@@ -166,7 +166,6 @@ function triggerDepthFirst() {
 function depthFirst() {
     if (!stack.isEmpty()) {
         s = stack.pop();
-        s.visited = true;
         if (s !== startNode && s !== endNode) {
             s.color = 0x00FF00;
         }
@@ -186,6 +185,9 @@ function depthFirst() {
                     if (neighbors[i].visited == true) {
                         continue;
                     }
+                    if (neighbors[i] !== endNode)
+                        neighbors[i].color = 0xA1FF96;
+                    neighbors[i].visited = true
                     neighbors[i].weight = s.weight + 1;
                     stack.push(neighbors[i]);
                 }
