@@ -80,7 +80,7 @@ function update(progress) {
     else if (swarmSelect)
         swarm();
     else if (depthFirstSelect)
-        depthFirstDraw();
+        depthFirst();
 }
 
 function draw() {
@@ -157,120 +157,42 @@ function breadthFirst() {
 /*############################################ [Depth First Section] ########################################### */
 function triggerDepthFirst() {
     clearBoard(false);
-
-
     stack = new Stack();
-    visitedQueue = new Queue();
     startNode.visited = true;
-    
     stack.push(startNode);
-    depthFirstRun =true;
-
-    depthFirst();
     depthFirstSelect=true;
-
-
 }
-function depthFirstDraw() {
-    while(!visitedQueue.isEmpty()) {
-        s =visitedQueue.dequeue();
-        if(s == startNode)
-            continue;
-        if(s == endNode)
-            continue;
-        s.color = 0x00FF00;
-    }
-    
-    depthFirstSelect=false;
-    drawPath();
-}
+
 function depthFirst() {
-    if(stack.isEmpty()) {
-        console.log("stack empty");
-        return;
-    }
-    if(depthFirstRun == false){
-        return;
-    }
-    s=stack.pop();
-    s.visited=true;
-    visitedQueue.enqueue(s);
-    if(s!== startNode && s!== endNode) {
-        //s.color = 0x00FF00;
-    }
-    if(s===endNode) {
-        console.log("DFS FINISHED");
-        depthFirstRun = false;
-        return;
-    }
-    else {
-        var neighbors = s.getNeighbors(false);
-        if(neighbors.length==0) {
-            console.log("no neighbors");
-            return;
-        }
-        else {
-            for(var i=0; i<neighbors.length; i++) {
-                if(neighbors[i].visited==true) {
-                    continue;
-                }
-                if(depthFirstRun == true) {
-                    neighbors[i].weight = s.weight+1;
-                    stack.push(neighbors[i]);
-                    depthFirst();
-                    if(depthFirstRun == false) {
-                        return;
-
-                    }
-                }
-                else {
-                    return;
-                }
-            }
-        }
-    }
-}
-
-/*
-function depthFirst() {
-    if(!stack.isEmpty() && depthFirstFinished==false) {
-        s=stack.pop();
-        s.visited=true;
-        //s.color= 0xA1FF96;
-        visitedStack.push(s);
-        if(s !== startNode && s !== endNode) {
+    if (!stack.isEmpty()) {
+        s = stack.pop();
+        s.visited = true;
+        if (s !== startNode && s !== endNode) {
             s.color = 0x00FF00;
         }
-        if(s === endNode) {
-            console.log("DFS Finished!!")
-            depthFirstFinished = true;
+        if (s === endNode) {
+            console.log("DFS FINISHED");
+            depthFirstSelect = false;
+            drawPath();
             return;
         }
         else {
             var neighbors = s.getNeighbors(false);
-            if(neighbors.length == 0) {
+            if (neighbors.length == 0) {
                 console.log("no neighbors");
-            }
-            else {
-                for (var i =0; i<neighbors.length; i++) {
-                    if(depthFirstFinished == true)
-                        return;
-                    if(neighbors[i].visited == false) {
-                        neighbors[i].weight = s.weight + 1;
-                        stack.push(neighbors[i]);
-                        depthFirst();
+                return;
+            } else {
+                for (var i = 0; i < neighbors.length; i++) {
+                    if (neighbors[i].visited == true) {
+                        continue;
                     }
+                    neighbors[i].weight = s.weight + 1;
+                    stack.push(neighbors[i]);
                 }
-            }  
+            }
         }
     }
-    else {
-        console.log("Could not find end Node");
-        return;
-    }
-    
-} */
-
+}
 
 
 //Note* I will be further researching this and try to implement. -Patrick
