@@ -1,3 +1,4 @@
+
 var stage = new PIXI.Container();
 var graphics = new PIXI.Graphics();
 var renderer = PIXI.autoDetectRenderer(200, 200, { backgroundColor: 0x000000 });
@@ -98,6 +99,13 @@ function loop(progress) {
     renderer.render(stage);
 }
 
+function heuristic(a, b) {
+
+    //euclidean - find the direct distance
+    var d = Math.sqrt(Math.pow(a.x - b.x, 2) + Math.pow(a.y - b.y, 2));
+    return d;
+}
+
 /*############################################ [Dijkstra's Section] ##################################################*/
 
 function triggerDij() {
@@ -114,14 +122,38 @@ function dij() {
 
 function triggerAStar() {
     clearBoard(false);
-
+    prio = new PriorityQueue();
+    startNode.visited = true;
+    prio.enqueue(startNode, 1);
     astarSelect = true;
 }
 
 function AStar() {
+    if (!prio.isEmpty()) {
+        s = prio.dequeue().element;
+        if (s !== startNode && s !== endNode) {
+            s.color = 0x00FF00;
+        }
 
+        if (s === endNode) {
+            console.log("AStar Finished");
+            astarSelect = false;
+            drawPath();
+
+        } else {
+            var neighbours = s.getNeighbors(false);
+            for (var i = 0; i < neighbours.length; i++) {
+                neighbours[i].visited = true;
+                neighbours[i].weight = s.weight + 1;
+
+                if (neighbours[i] !== endNode)
+                    neighbours[i].color = 0xA1FF96;
+                prio.enqueue(neighbours[i], heuristic(neighbours[i], endNode));
+            }
+        }
+
+    }
 }
-
 /*######################################## [Breadth-First Section] #############################################*/
 
 function triggerBreadthFirst() {
@@ -160,7 +192,7 @@ function triggerDepthFirst() {
     stack = new Stack();
     startNode.visited = true;
     stack.push(startNode);
-    depthFirstSelect=true;
+    depthFirstSelect = true;
 }
 
 function depthFirst() {
@@ -224,6 +256,8 @@ function drawPath() {
         currentNode = closest;
     }
 }
+
+
 
 //a full clear true will clear all boundary nodes, and a false full clear will only clear visited nodes
 function clearBoard(fullClear) {
@@ -320,7 +354,7 @@ class Stack {
         var poppedElement;
         if (this.isEmpty()) {
             console.log("Underflow");
-            
+
             return "Underflow";
         }
         poppedElement = this.items.pop();
@@ -329,6 +363,77 @@ class Stack {
     isEmpty() {
         return this.items.length == 0;
     }
+}
+
+// User defined class 
+// to store element and its priority 
+class QElement {
+    constructor(element, priority) {
+        this.element = element;
+        this.priority = priority;
+    }
+}
+
+// PriorityQueue class 
+class PriorityQueue {
+
+    // An array is used to implement priority 
+    constructor() {
+        this.items = [];
+    }
+    // enqueue function to add element 
+    // to the queue as per priority 
+    enqueue(element, priority) {
+        // creating object from queue element 
+        var qElement = new QElement(element, priority);
+        var contain = false;
+
+        // iterating through the entire 
+        // item array to add element at the 
+        // correct location of the Queue 
+        for (var i = 0; i < this.items.length; i++) {
+            if (this.items[i].priority > qElement.priority) {
+                // Once the correct location is found it is 
+                // enqueued 
+                this.items.splice(i, 0, qElement);
+                contain = true;
+                break;
+            }
+        }
+
+        // if the element have the highest priority 
+        // it is added at the end of the queue 
+        if (!contain) {
+            this.items.push(qElement);
+        }
+    }
+
+    // dequeue method to remove 
+    // element from the queue 
+    dequeue() {
+        // return the dequeued element 
+        // and remove it. 
+        // if the queue is empty 
+        // returns Underflow 
+        if (this.isEmpty())
+            return "Underflow";
+        return this.items.shift();
+    }
+
+    // isEmpty function 
+    isEmpty() {
+        // return true if the queue is empty. 
+        return this.items.length == 0;
+    }
+
+
+    // functions to be implemented 
+    // enqueue(item, priority) 
+    // dequeue() 
+    // front() 
+    // isEmpty() 
+    // printPQueue() 
+
 }
 
 /*################################# [ Controls ] ####################################### */
