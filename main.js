@@ -110,12 +110,37 @@ function heuristic(a, b) {
 
 function triggerDij() {
     clearBoard(false);
-
+    prio = new PriorityQueue();
+    startNode.visited = true;
+    prio.enqueue(startNode, 0);
     dijSelect = true;
 }
 
 function dij() {
+    if (!prio.isEmpty()) {
+        s = prio.dequeue().element;
+        if (s !== startNode && s !== endNode) {
+            s.color = 0x00FF00;
+        }
 
+        if (s === endNode) {
+            console.log("Dijsktras Finished");
+            astarSelect = false;
+            drawPath();
+
+        } else {
+            var neighbours = s.getNeighbors(false);
+            for (var i = 0; i < neighbours.length; i++) {
+                neighbours[i].visited = true;
+                neighbours[i].weight = s.weight + 1;
+
+                if (neighbours[i] !== endNode)
+                    neighbours[i].color = 0xA1FF96;
+                prio.enqueue(neighbours[i], s.weight + 1);
+            }
+        }
+
+    }
 }
 
 /*############################################ [A* Section] ##################################################*/
@@ -151,7 +176,6 @@ function AStar() {
                 prio.enqueue(neighbours[i], heuristic(neighbours[i], endNode));
             }
         }
-
     }
 }
 /*######################################## [Breadth-First Section] #############################################*/
