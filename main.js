@@ -123,7 +123,7 @@ function dij() {
 
         if (s === endNode) {
             console.log("Dijsktras Finished");
-            astarSelect = false;
+            dijSelect = false;
             drawPath();
 
         } else {
@@ -154,6 +154,7 @@ function triggerAStar() {
 function AStar() {
     if (!prio.isEmpty()) {
         s = prio.dequeue().element;
+        s.visited = true;
         if (s !== startNode && s !== endNode) {
             s.color = 0x00FF00;
         }
@@ -207,7 +208,7 @@ function breadthFirst() {
         }
     }
 }
-//Additional section -Patrick
+
 /*############################################ [Depth First Section] ########################################### */
 function triggerDepthFirst() {
     clearBoard(false);
@@ -220,6 +221,7 @@ function triggerDepthFirst() {
 function depthFirst() {
     if (!stack.isEmpty()) {
         s = stack.pop();
+        s.visited = true
         if (s !== startNode && s !== endNode) {
             s.color = 0x00FF00;
         }
@@ -241,7 +243,6 @@ function depthFirst() {
                     }
                     if (neighbors[i] !== endNode)
                         neighbors[i].color = 0xA1FF96;
-                    neighbors[i].visited = true
                     neighbors[i].weight = s.weight + 1;
                     stack.push(neighbors[i]);
                 }
