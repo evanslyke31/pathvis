@@ -13,7 +13,7 @@ var screenWidth, screenHeight;
 var boardW, boardH;
 var nodeSize;
 var startNode, endNode;
-var dijSelect, astarSelect, bfSelect, swarmSelect, depthFirstSelect;
+var dijSelect, astarSelect, bfSelect, depthFirstSelect;
 var controlHeight;
 var startNodeX, startNodeY, endNodeX, endNodeY;
 var isLeftDown, isRightDown;
@@ -43,7 +43,7 @@ function init() {
         nodeSize = screenWidth / 14;
     boardW = Math.floor(screenWidth / nodeSize);
     boardH = Math.floor(screenHeight / nodeSize);
-    dijSelect = astarSelect = bfSelect = swarmSelect = false;
+    dijSelect = astarSelect = bfSelect = depthFirstSelect = false;
     startNodeX = 3;
     startNodeY = 3;
     endNodeX = boardW - 3;
@@ -78,8 +78,6 @@ function update(progress) {
         dij();
     else if (astarSelect)
         AStar();
-    else if (swarmSelect)
-        swarm();
     else if (depthFirstSelect)
         depthFirst();
 }
@@ -252,20 +250,6 @@ function depthFirst() {
     }
 }
 
-
-//Note* I will be further researching this and try to implement. -Patrick
-/*############################################ [Swarm Section] ##################################################*/
-
-function triggerSwarm() {
-    clearBoard(false);
-
-    swarmSelect = true;
-}
-
-function swarm() {
-
-}
-
 /*########################################### [Supporting Functions] ###############################################*/
 //traces the least cost past by following the least weighted nodes of its neighbors
 function drawPath() {
@@ -305,7 +289,7 @@ function clearBoard(fullClear) {
     startNode.weight = 0;
     endNode = nodes[endNodeX][endNodeY];
     endNode.color = 0xFF0000;
-    dijSelect = astarSelect = bfSelect = swarmSelect = depthFirstSelect = false;
+    dijSelect = astarSelect = bfSelect = depthFirstSelect = false;
 }
 
 //The object Node will make up the board
@@ -345,7 +329,7 @@ function Node(x, y, color) {
 
 //check if any algorithms from running so board does not break when moving start and end nodes
 function isRunning() {
-    return (dijSelect || astarSelect || bfSelect || swarmSelect || depthFirstSelect);
+    return (dijSelect || astarSelect || bfSelect || depthFirstSelect);
 }
 
 /*########################### [ Supporting Data Structures ] ##################################*/
